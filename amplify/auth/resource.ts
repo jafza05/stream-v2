@@ -19,8 +19,10 @@ export const auth = defineAuth({
         scopes: ['public_profile', 'email']
       },
       callbackUrls: [
+        'https://www.spookfishbeta.com/auth',
         'https://www.spookfishbeta.com/login',
         'https://www.spookfishbeta.com/',
+        'http://localhost:3000/auth',
         'http://localhost:3000/login',
         'http://localhost:3000/',
         'http://localhost:3001',
@@ -29,7 +31,9 @@ export const auth = defineAuth({
       ],
       logoutUrls: [
         'https://www.spookfishbeta.com/',
-        'http://localhost:3000/'
+        'https://www.spookfishbeta.com/auth',
+        'http://localhost:3000/',
+        'http://localhost:3000/auth'
       ]
     }
     // Social providers removed - add them back when you've set up the secrets
