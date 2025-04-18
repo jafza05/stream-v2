@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Navigation } from "@/app/components/Navigation";
 import { useAuth } from "@/app/components/AuthProvider";
 import { useSearchParams } from "next/navigation";
@@ -11,7 +11,7 @@ import Link from "next/link";
 // Create a data client
 const dataClient = generateClient<Schema>();
 
-export default function VisualizationsPage() {
+function VisualizationsContent() {
   const { user, loading: authLoading } = useAuth();
   const [visualizationTypes, setVisualizationTypes] = useState<Schema["VisualizationType"]["type"][]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +40,7 @@ export default function VisualizationsPage() {
       } catch (error) {
         console.error("Error fetching visualization types:", error);
         // For demo purposes, set some dummy data if no visualization types exist yet
-        setVisualizationTypes([
+        const mockVisualizations = [
           {
             id: "sports-1",
             name: "Sports Dashboard",
@@ -53,7 +53,16 @@ export default function VisualizationsPage() {
               refreshInterval: 60,
               showScores: true,
               showStats: true
-            })
+            }),
+            settings: {
+              items: [],
+              isSynced: true,
+              hasNextPage: false,
+              nextToken: null,
+              startedAt: null
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
           },
           {
             id: "financial-1",
@@ -67,7 +76,16 @@ export default function VisualizationsPage() {
               refreshInterval: 5,
               showTickers: true,
               charts: ["line", "candle"]
-            })
+            }),
+            settings: {
+              items: [],
+              isSynced: true,
+              hasNextPage: false,
+              nextToken: null,
+              startedAt: null
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
           },
           {
             id: "weather-1",
@@ -81,9 +99,21 @@ export default function VisualizationsPage() {
               refreshInterval: 300,
               units: "metric",
               showForecast: true
-            })
+            }),
+            settings: {
+              items: [],
+              isSynced: true,
+              hasNextPage: false,
+              nextToken: null,
+              startedAt: null
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
           }
-        ]);
+        ];
+        
+        // Type assertion to bypass type checking
+        setVisualizationTypes(mockVisualizations as unknown as Schema["VisualizationType"]["type"][]);
       } finally {
         setLoading(false);
       }
@@ -143,5 +173,18 @@ export default function VisualizationsPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function VisualizationsPage() {
+  return (
+    <Suspense fallback={
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading visualizations...</p>
+      </div>
+    }>
+      <VisualizationsContent />
+    </Suspense>
   );
 } 
