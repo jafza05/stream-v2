@@ -7,7 +7,6 @@ import { defineAuth, secret } from "@aws-amplify/backend";
 export const auth = defineAuth({
   loginWith: {
     email: true,
-    phone: undefined,
     externalProviders: {
       callbackUrls: ["http://localhost:3000", "https://www.spookfishbeta.com"],
       logoutUrls: ["http://localhost:3000", "https://www.spookfishbeta.com"],
@@ -21,17 +20,7 @@ export const auth = defineAuth({
       },
     },
   },
-  userAttributes: {
-    // Add custom attributes for user profiles
-    preferredUsername: {
-      required: false,
-      mutable: true,
-    },
-    timezone: {
-      required: false,
-      mutable: true,
-    },
-  },
+  // Remove custom attributes for now as they are causing deployment issues
   multifactor: {
     mode: "OPTIONAL",
     sms: true,
