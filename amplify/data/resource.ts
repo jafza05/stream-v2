@@ -23,8 +23,8 @@ const schema = a.schema({
       firstName: a.string(),
       lastName: a.string(),
       timezone: a.string(),
-      // Relationships
-      visualizationSettings: a.hasMany("VisualizationSetting", ["id"]),
+      // Relationships - reference the field in VisualizationSetting that points back
+      visualizationSettings: a.hasMany("VisualizationSetting", ["userProfileID"]),
     })
     .authorization((allow) => [
       // Owner can do anything with their own profile
@@ -41,8 +41,8 @@ const schema = a.schema({
       dataSourceType: a.enum(['API', 'DYNAMODB', 'WEBSOCKET']),
       dataSourceConfig: a.string(), // JSON config for the data source
       defaultConfig: a.string(), // Default configuration as JSON
-      // Relationships
-      settings: a.hasMany("VisualizationSetting", ["id"]),
+      // Relationships - reference the field in VisualizationSetting that points back
+      settings: a.hasMany("VisualizationSetting", ["visualizationTypeID"]),
     })
     .authorization((allow) => [
       // Anyone can read visualization types
@@ -62,11 +62,12 @@ const schema = a.schema({
       sessionId: a.string(),
       // Timestamps for tracking
       lastViewed: a.datetime(),
-      // Relationships
+      // Relationships - foreign keys
       userProfileID: a.string(),
-      userProfile: a.belongsTo("UserProfile", ["userProfileID"]),
       visualizationTypeID: a.string().required(),
-      visualizationType: a.belongsTo("VisualizationType", ["visualizationTypeID"]),
+      // Belongs to relationships
+      userProfile: a.belongsTo("UserProfile", "userProfileID"),
+      visualizationType: a.belongsTo("VisualizationType", "visualizationTypeID"),
     })
     .authorization((allow) => [
       // Owner can do anything with their settings
