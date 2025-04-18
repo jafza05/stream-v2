@@ -1,4 +1,4 @@
-import { defineAuth } from "@aws-amplify/backend";
+import { defineAuth, secret } from "@aws-amplify/backend";
 
 /**
  * Define and configure your auth resource
@@ -7,12 +7,23 @@ import { defineAuth } from "@aws-amplify/backend";
 export const auth = defineAuth({
   loginWith: {
     email: true,
-    phone: false,
-    username: false,
+    phone: undefined,
+    externalProviders: {
+      callbackUrls: ["http://localhost:3000", "https://www.spookfishbeta.com"],
+      logoutUrls: ["http://localhost:3000", "https://www.spookfishbeta.com"],
+      google: {
+        clientId: secret("GOOGLE_CLIENT_ID"),
+        clientSecret: secret("GOOGLE_CLIENT_SECRET"),
+      },
+      facebook: {
+        clientId: secret("FACEBOOK_CLIENT_ID"),
+        clientSecret: secret("FACEBOOK_CLIENT_SECRET"),
+      },
+    },
   },
   userAttributes: {
     // Add custom attributes for user profiles
-    preferredName: {
+    preferredUsername: {
       required: false,
       mutable: true,
     },
@@ -22,14 +33,7 @@ export const auth = defineAuth({
     },
   },
   multifactor: {
-    mode: "optional",
+    mode: "OPTIONAL",
     sms: true,
-  },
-  passwordPolicy: {
-    minLength: 8,
-    requireLowercase: true,
-    requireUppercase: true,
-    requireNumbers: true,
-    requireSpecialCharacters: true,
   },
 });

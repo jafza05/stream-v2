@@ -11,7 +11,7 @@ const schema = a.schema({
     .model({
       content: a.string(),
     })
-    .authorization((allow) => [allow.publicApiKey()]),
+    .authorization((allow) => [allow.publicApiKey().to(['create', 'read', 'update', 'delete'])]),
 
   // User Profile model linked to auth users
   UserProfile: a
@@ -24,13 +24,13 @@ const schema = a.schema({
       lastName: a.string(),
       timezone: a.string(),
       // Relationships
-      visualizationSettings: a.hasMany("VisualizationSetting"),
+      visualizationSettings: a.hasMany("VisualizationSetting", ["id"]),
     })
     .authorization((allow) => [
       // Owner can do anything with their own profile
       allow.owner(),
       // Public read for minimal profile data if needed
-      allow.public().to(['read']).on(['userId', 'username']),
+      allow.publicApiKey().to(['read']),
     ]),
 
   // Visualization types (sports, financial, etc.)
@@ -42,12 +42,12 @@ const schema = a.schema({
       dataSourceConfig: a.string(), // JSON config for the data source
       defaultConfig: a.string(), // Default configuration as JSON
       // Relationships
-      settings: a.hasMany("VisualizationSetting"),
+      settings: a.hasMany("VisualizationSetting", ["id"]),
     })
     .authorization((allow) => [
       // Anyone can read visualization types
-      allow.public().to(['read']),
-      // Only admins can create/update/delete
+      allow.publicApiKey().to(['read']),
+      // Only admins can create/update/delete using groups
       allow.groups(['Admin']).to(['create', 'update', 'delete']),
     ]),
 
@@ -64,15 +64,15 @@ const schema = a.schema({
       lastViewed: a.datetime(),
       // Relationships
       userProfileID: a.string(),
-      userProfile: a.belongsTo("UserProfile"),
+      userProfile: a.belongsTo("UserProfile", ["userProfileID"]),
       visualizationTypeID: a.string().required(),
-      visualizationType: a.belongsTo("VisualizationType"),
+      visualizationType: a.belongsTo("VisualizationType", ["visualizationTypeID"]),
     })
     .authorization((allow) => [
       // Owner can do anything with their settings
       allow.owner(),
       // Allow public access for guest settings (identified by sessionId)
-      allow.public().to(['create', 'read', 'update', 'delete']).when(ctx => !!ctx.args.sessionId),
+      allow.publicApiKey().to(['create', 'read', 'update', 'delete']),
     ]),
 });
 
@@ -85,12 +85,6 @@ export const data = defineData({
     // Keep API key for public access
     apiKeyAuthorizationMode: {
       expiresInDays: 30,
-    },
-    // Enable IAM authorization for admin access
-    iamAuthorizationMode: {
-      role: {
-        name: "streamVisualizationAdminRole",
-      },
     },
   },
 });
