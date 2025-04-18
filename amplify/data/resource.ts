@@ -27,8 +27,10 @@ const schema = a.schema({
       visualizationSettings: a.hasMany("VisualizationSetting", ["userProfileID"]),
     })
     .authorization((allow) => [
-      // Since auth is temporarily disabled, use only API key for now
-      allow.publicApiKey().to(['create', 'read', 'update', 'delete']),
+      // Owner can do anything with their own profile
+      allow.owner(),
+      // Public read for minimal profile data if needed
+      allow.publicApiKey().to(['read']),
     ]),
 
   // Visualization types (sports, financial, etc.)
@@ -43,8 +45,10 @@ const schema = a.schema({
       settings: a.hasMany("VisualizationSetting", ["visualizationTypeID"]),
     })
     .authorization((allow) => [
-      // Since auth is temporarily disabled, use only API key for now
-      allow.publicApiKey().to(['create', 'read', 'update', 'delete']),
+      // Anyone can read visualization types
+      allow.publicApiKey().to(['read']),
+      // Only admins can create/update/delete using groups
+      allow.groups(['Admin']).to(['create', 'update', 'delete']),
     ]),
 
   // User-specific settings for visualizations
@@ -66,7 +70,9 @@ const schema = a.schema({
       visualizationType: a.belongsTo("VisualizationType", "visualizationTypeID"),
     })
     .authorization((allow) => [
-      // Since auth is temporarily disabled, use only API key for now
+      // Owner can do anything with their settings
+      allow.owner(),
+      // Allow public access for guest settings (identified by sessionId)
       allow.publicApiKey().to(['create', 'read', 'update', 'delete']),
     ]),
 });
@@ -76,7 +82,7 @@ export type Schema = ClientSchema<typeof schema>;
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: "apiKey",
+    defaultAuthorizationMode: "userPool",
     // Keep API key for public access
     apiKeyAuthorizationMode: {
       expiresInDays: 30,
