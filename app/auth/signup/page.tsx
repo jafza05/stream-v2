@@ -167,6 +167,12 @@ export default function SignupPage() {
             </div>
           </form>
         )}
+        
+        <div className="auth-page-footer">
+          <Link href="/privacy">Privacy Policy</Link>
+          <span className="separator">•</span>
+          <Link href="/data-deletion">Data Deletion</Link>
+        </div>
       </div>
     </div>
   );

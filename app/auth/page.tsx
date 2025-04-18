@@ -28,6 +28,11 @@ export default function AuthPage() {
         <div className="signup-link">
           <p>Don't have an account? <Link href="/auth/signup">Sign up</Link></p>
         </div>
+        <div className="auth-page-footer">
+          <Link href="/privacy">Privacy Policy</Link>
+          <span className="separator">•</span>
+          <Link href="/data-deletion">Data Deletion</Link>
+        </div>
       </div>
     </div>
   );
