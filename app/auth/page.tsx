@@ -1,0 +1,30 @@
+"use client";
+
+import React from 'react';
+import { AuthUI } from '@/app/components/AuthUI';
+import { useAuth } from '@/app/components/AuthProvider';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
+export default function AuthPage() {
+  const { user } = useAuth();
+  const router = useRouter();
+
+  // Redirect authenticated users to home page if they're already logged in
+  // (but allow guests to see the auth page to sign in)
+  useEffect(() => {
+    if (user && !user.isGuest) {
+      router.push('/');
+    }
+  }, [user, router]);
+
+  return (
+    <div className="auth-page">
+      <div className="auth-container">
+        <h1>Welcome to Stream Visualizations</h1>
+        <p>Sign in to save your custom visualizations and settings</p>
+        <AuthUI />
+      </div>
+    </div>
+  );
+} 
