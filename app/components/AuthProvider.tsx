@@ -2,7 +2,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getCurrentUser, signIn, signOut } from 'aws-amplify/auth';
+import { getCurrentUser, signIn, signOut, signInWithRedirect } from 'aws-amplify/auth';
+import { Hub } from 'aws-amplify/utils';
 import { generateClient } from 'aws-amplify/data';
 import { v4 as uuidv4 } from 'uuid';
 import type { Schema } from '@/amplify/data/resource';
@@ -28,6 +29,7 @@ type AuthContextType = {
   signOut: () => Promise<void>;
   continueAsGuest: () => void;
   refreshUserProfile: () => Promise<void>;
+  socialSignIn: (provider: 'Google' | 'Facebook' | 'Amazon' | 'Apple') => Promise<void>;
 };
 
 // Create context
@@ -85,8 +87,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(prev => prev ? { ...prev, profile } : null);
   };
 
-  // Check authentication status on mount
+  // Listen for auth events
   useEffect(() => {
+    const unsubscribe = Hub.listen("auth", ({ payload }) => {
+      switch (payload.event) {
+        case "signInWithRedirect":
+          checkUser();
+          break;
+        case "signInWithRedirect_failure":
+          console.error("An error occurred during the OAuth flow.");
+          break;
+      }
+    });
+
     const checkUser = async () => {
       try {
         // Try to get authenticated user
@@ -122,6 +135,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     checkUser();
+    
+    return unsubscribe;
   }, []);
 
   // Handle sign in
@@ -147,6 +162,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return signInResponse;
     } catch (error) {
       console.error('Error signing in:', error);
+      throw error;
+    }
+  };
+
+  // Handle social sign in
+  const handleSocialSignIn = async (provider: 'Google' | 'Facebook' | 'Amazon' | 'Apple') => {
+    try {
+      await signInWithRedirect({ provider });
+      // The user will be redirected to the OAuth provider
+      // After successful authentication, they'll be redirected back to the app
+      // The Hub listener above will handle setting the user state
+    } catch (error) {
+      console.error(`Error signing in with ${provider}:`, error);
       throw error;
     }
   };
@@ -189,6 +217,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signOut: handleSignOut,
     continueAsGuest,
     refreshUserProfile,
+    socialSignIn: handleSocialSignIn,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

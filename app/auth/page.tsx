@@ -5,6 +5,7 @@ import { AuthUI } from '@/app/components/AuthUI';
 import { useAuth } from '@/app/components/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import Link from 'next/link';
 
 export default function AuthPage() {
   const { user } = useAuth();
@@ -24,6 +25,9 @@ export default function AuthPage() {
         <h1>Welcome to Stream Visualizations</h1>
         <p>Sign in to save your custom visualizations and settings</p>
         <AuthUI />
+        <div className="signup-link">
+          <p>Don't have an account? <Link href="/auth/signup">Sign up</Link></p>
+        </div>
       </div>
     </div>
   );

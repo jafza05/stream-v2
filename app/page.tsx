@@ -1,93 +1,154 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Navigation } from "./components/Navigation";
+import { useState } from "react";
 import { useAuth } from "./components/AuthProvider";
 import Link from "next/link";
-import { Amplify } from "aws-amplify";
-import outputs from "@/amplify_outputs.json";
+import { Navigation } from "./components/Navigation";
+import styles from "./page.module.css";
 
-// Initialize Amplify
-if (typeof window !== "undefined") {
-  Amplify.configure(outputs);
-}
+// Import or create these icons as needed
+// They are placeholders and should be replaced with your actual icons
+const SportsIcon = () => <span className={styles.iconWrapper}>🏆</span>;
+const FinanceIcon = () => <span className={styles.iconWrapper}>📈</span>;
+const DashboardIcon = () => <span className={styles.iconWrapper}>📊</span>;
+const CustomIcon = () => <span className={styles.iconWrapper}>⚙️</span>;
+const RealTimeIcon = () => <span className={styles.iconWrapper}>⚡</span>;
+const ApiIcon = () => <span className={styles.iconWrapper}>🔌</span>;
 
 export default function Home() {
-  const { user, loading } = useAuth();
+  const { user, loading, signIn, signOut } = useAuth();
+  const [activeCard, setActiveCard] = useState<string | null>(null);
+  const [message, setMessage] = useState("");
   
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}></div>
         <p>Loading...</p>
       </div>
     );
   }
 
+  const handleCardSelect = (category: string) => {
+    setActiveCard(category);
+    setMessage(`Opening ${category} visualizations...`);
+    // This would actually navigate in a real implementation
+    // setTimeout to simulate navigation delay
+    setTimeout(() => {
+      setMessage("");
+      setActiveCard(null);
+    }, 2000);
+  };
+
+  const displayOptions = [
+    { 
+      id: "sports", 
+      name: "Sports Data", 
+      icon: <SportsIcon />,
+      description: "Real-time statistics and scores",
+      path: "/visualizations?category=sports"
+    },
+    { 
+      id: "financial", 
+      name: "Financial", 
+      icon: <FinanceIcon />,
+      description: "Market trends and analysis",
+      path: "/visualizations?category=financial"  
+    },
+    { 
+      id: "dashboard", 
+      name: "Dashboards", 
+      icon: <DashboardIcon />,
+      description: "Your personalized views",
+      path: "/visualizations/custom"  
+    },
+    { 
+      id: "custom", 
+      name: "Custom Views", 
+      icon: <CustomIcon />,
+      description: "Build your own visualizations",
+      path: "/visualizations/new"  
+    },
+    { 
+      id: "realtime", 
+      name: "Real-time", 
+      icon: <RealTimeIcon />,
+      description: "Live data streams",
+      path: "/visualizations/realtime"  
+    },
+    { 
+      id: "api", 
+      name: "API Access", 
+      icon: <ApiIcon />,
+      description: "Connect to our data",
+      path: "/api/docs"  
+    }
+  ];
+
   return (
-    <main className="main-container">
+    <main className={styles.mainContainer}>
       <Navigation />
       
-      <div className="hero-section">
-        <h1>Real-time Data Visualizations</h1>
-        <p className="hero-subtitle">
-          Explore sports, financial, and other data through customizable visualizations
-        </p>
-      </div>
-
-      <div className="features-section">
-        <div className="feature-card">
-          <h2>Sports Data</h2>
-          <p>Real-time statistics, scores, and analytics for various sports competitions</p>
-          <Link href="/visualizations?category=sports" className="feature-link">
-            Explore Sports Data
-          </Link>
-        </div>
-
-        <div className="feature-card">
-          <h2>Financial Markets</h2>
-          <p>Track stocks, cryptocurrencies, and other financial instruments in real-time</p>
-          <Link href="/visualizations?category=financial" className="feature-link">
-            Explore Financial Data
-          </Link>
-        </div>
-
-        <div className="feature-card">
-          <h2>Custom Dashboards</h2>
-          <p>Create your personalized dashboards with the data that matters to you</p>
-          <Link href="/visualizations/custom" className="feature-link">
-            Create Dashboard
-          </Link>
-        </div>
-      </div>
-
-      {user && (
-        <div className="user-dashboard">
-          <h2>{user.isGuest ? "Guest Dashboard" : "Your Dashboard"}</h2>
-          
-          {user.isGuest ? (
-            <div className="guest-message">
-              <p>
-                You're browsing as a guest. Your settings will be saved in this browser only.
-                <Link href="/auth" className="auth-link">
-                  Sign in or create an account
-                </Link>
-                to save your settings across devices.
-              </p>
-            </div>
-          ) : (
-            <div className="user-visualizations">
-              <p>Welcome back, {user.username}!</p>
-              <div className="visualization-list">
-                <p>Your saved visualizations will appear here.</p>
-                <Link href="/visualizations/new" className="create-btn">
-                  Create New Visualization
-                </Link>
-              </div>
-            </div>
+      <div className={styles.centeredContent}>
+        {/* Logo and Title Section */}
+        <div className={styles.logoSection}>
+          <div className={styles.logo}>
+            {/* Replace with your actual logo */}
+            <span className={styles.logoText}>Stream</span>
+          </div>
+          <h1 className={styles.mainTitle}>
+            {user ? "Select Visualization" : "Real-time Data Visualizations"}
+          </h1>
+          {!user && (
+            <p className={styles.subtitle}>
+              Explore sports, financial, and other data through customizable dashboards
+            </p>
           )}
         </div>
-      )}
+
+        {user ? (
+          <>
+            {/* Display Options Grid */}
+            <div className={styles.optionsGrid}>
+              {displayOptions.map((option) => (
+                <Link 
+                  href={option.path} 
+                  key={option.id}
+                  className={`${styles.optionCard} ${activeCard === option.id ? styles.activeCard : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleCardSelect(option.name);
+                  }}
+                >
+                  <div className={styles.cardIcon}>{option.icon}</div>
+                  <div className={styles.cardContent}>
+                    <h3 className={styles.cardTitle}>{option.name}</h3>
+                    <p className={styles.cardDescription}>{option.description}</p>
+                  </div>
+                  <div className={styles.cardGlow}></div>
+                </Link>
+              ))}
+            </div>
+
+            {/* Status Message */}
+            {message && (
+              <div className={styles.statusMessage}>
+                {message}
+              </div>
+            )}
+          </>
+        ) : (
+          /* Login/Guest Buttons */
+          <div className={styles.authButtons}>
+            <Link href="/auth?mode=signin" className={styles.primaryButton}>
+              Sign In
+            </Link>
+            <Link href="/visualizations?guest=true" className={styles.secondaryButton}>
+              Continue as Guest
+            </Link>
+          </div>
+        )}
+      </div>
     </main>
   );
 }

@@ -152,6 +152,29 @@ export function AuthUI() {
                 </button>
               </div>
             </form>
+            
+            <div className="social-login">
+              <hr />
+              <p>Or sign in with:</p>
+              <div className="social-buttons">
+                <button
+                  type="button"
+                  onClick={() => useAuth().socialSignIn('Google')}
+                  className="social-button google-button"
+                  disabled={loading}
+                >
+                  <i className="fa fa-google"></i> Google
+                </button>
+                <button
+                  type="button"
+                  onClick={() => useAuth().socialSignIn('Facebook')}
+                  className="social-button facebook-button"
+                  disabled={loading}
+                >
+                  <i className="fa fa-facebook"></i> Facebook
+                </button>
+              </div>
+            </div>
           </div>
         );
       
