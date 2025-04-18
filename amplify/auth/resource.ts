@@ -1,4 +1,4 @@
-import { defineAuth } from "@aws-amplify/backend";
+import { defineAuth, secret } from "@aws-amplify/backend";
 
 /**
  * Define and configure your auth resource
@@ -6,7 +6,32 @@ import { defineAuth } from "@aws-amplify/backend";
  */
 export const auth = defineAuth({
   loginWith: {
-    email: true
+    email: true,
+    externalProviders: {
+      google: {
+        clientId: secret('GOOGLE_CLIENT_ID'),
+        clientSecret: secret('GOOGLE_CLIENT_SECRET'),
+        scopes: ['profile', 'email', 'openid']
+      },
+      facebook: {
+        clientId: secret('FACEBOOK_CLIENT_ID'),
+        clientSecret: secret('FACEBOOK_CLIENT_SECRET'),
+        scopes: ['public_profile', 'email']
+      },
+      callbackUrls: [
+        'https://www.spookfishbeta.com/login',
+        'https://www.spookfishbeta.com/',
+        'http://localhost:3000/login',
+        'http://localhost:3000/',
+        'http://localhost:3001',
+        'http://localhost:3002',
+        'http://localhost:3003'
+      ],
+      logoutUrls: [
+        'https://www.spookfishbeta.com/',
+        'http://localhost:3000/'
+      ]
+    }
     // Social providers removed - add them back when you've set up the secrets
     // To add social providers back:
     // 1. Create secrets with: npx ampx sandbox secret set GOOGLE_CLIENT_ID your-client-id
